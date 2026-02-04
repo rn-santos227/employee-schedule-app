@@ -52,5 +52,16 @@ export const useAuthStore = defineStore('auth', {
         })
       )
     },
+
+    logout() {
+      this.token = null
+      this.userId = null
+      this.role = null
+      hasLoaded = true
+
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY)
+      }
+    }
   },
 })
