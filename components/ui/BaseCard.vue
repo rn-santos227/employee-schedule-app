@@ -14,11 +14,13 @@
 </template>
 
 <script setup lang="ts">
+import type { UiSize } from './ui.constants'
+
 const props = withDefaults(
   defineProps<{
     title?: string
     subtitle?: string
-    padding?: 'sm' | 'md' | 'lg'
+    padding?: UiSize
   }>(),
   {
     title: '',
@@ -30,7 +32,7 @@ const props = withDefaults(
 const baseClasses =
   'rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/60'
 
-const paddingClasses: Record<'sm' | 'md' | 'lg', string> = {
+const paddingClasses: Record<UiSize, string> = {
   sm: 'p-4',
   md: 'p-6',
   lg: 'p-8'

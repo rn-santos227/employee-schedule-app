@@ -15,11 +15,12 @@
 </template>
 
 <script setup lang="ts">
+import type { UiSize } from './ui.constants'
 
 const props = withDefaults(
   defineProps<{
     variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
-    size?: 'sm' | 'md' | 'lg'
+    size?: UiSize
     type?: 'button' | 'submit' | 'reset'
     disabled?: boolean
     fullWidth?: boolean
@@ -36,7 +37,7 @@ const props = withDefaults(
 const baseClasses =
   'inline-flex items-center justify-center gap-2 rounded-xl font-semibold uppercase tracking-wide shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 active:shadow-sm'
 
-const sizeClasses: Record<'sm' | 'md' | 'lg', string> = {
+const sizeClasses: Record<UiSize, string> = {
   sm: 'px-3 py-2 text-xs',
   md: 'px-4 py-2.5 text-sm',
   lg: 'px-6 py-3 text-base'
