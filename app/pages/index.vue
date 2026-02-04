@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-500">
+  <div class="flex w-full flex-1 items-center justify-center text-sm text-slate-500">
     Redirecting…
   </div>
 </template>
