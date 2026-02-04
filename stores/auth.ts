@@ -36,5 +36,21 @@ export const useAuthStore = defineStore('auth', {
         this.role = null
       }
     },
+
+    login(userId: string, role: Role) {
+      this.token = crypto.randomUUID()
+      this.userId = userId
+      this.role = role
+      hasLoaded = true
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          token: this.token,
+          userId: this.userId,
+          role: this.role
+        })
+      )
+    },
   },
 })
