@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia'
 import type { User } from '../@types/user'
+import usersData from '../data/users.json'
 
-const defaultUsers: User[] = [
-  { id: 'u-admin', name: 'Alex Admin', role: 'admin' },
-  { id: 'u-employee-1', name: 'Erin Employee', role: 'employee' },
-  { id: 'u-employee-2', name: 'Sam Scheduler', role: 'employee' }
-]
+const defaultUsers = usersData as User[]
 
 export const useUsersStore = defineStore('users', {
   state: () => ({
