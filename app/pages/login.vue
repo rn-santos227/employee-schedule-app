@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-slate-50 px-4 py-12">
     <div class="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <BaseCard
-        title="Welcome back"
+        title="Employee Schedule Portal"
         subtitle="Sign in to manage employee schedules."
         class="w-full"
       >
@@ -12,7 +12,7 @@
             type="email"
             label="Email"
             placeholder="you@example.com"
-            :disabled="isSubmitting"
+          :disabled="isSubmitting"
             required
           />
           <BaseTextField
@@ -31,8 +31,6 @@
           </BaseButton>
         </form>
       </BaseCard>
-
-      <BaseCard title="Need access?" subtitle="Use your assigned email and password to sign in." class="w-full" />
     </div>
   </div>
 </template>
