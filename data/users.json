@@ -1,5 +1,29 @@
 [
-  { "id": "u-admin", "name": "Alex Admin", "role": "admin" },
-  { "id": "u-employee-1", "name": "Erin Employee", "role": "employee" },
-  { "id": "u-employee-2", "name": "Sam Scheduler", "role": "employee" }
+  {
+    "id": "u-admin",
+    "name": "Alex Admin",
+    "role": "admin",
+    "email": "alex.admin@example.com",
+    "passwordPlain": "AdminPass123!",
+    "passwordSalt": "e987cdfd829d5bab89b7093a703979ad",
+    "passwordHash": "8eea4df68b3656e57a082aea7d0ef2ff5e52f236c457db979652be368f8ecfc2"
+  },
+  {
+    "id": "u-employee-1",
+    "name": "Erin Employee",
+    "role": "employee",
+    "email": "erin.employee@example.com",
+    "passwordPlain": "EmployeePass123!",
+    "passwordSalt": "84e786d65e85daa7073f49e0b4a23058",
+    "passwordHash": "218ceb49cffca2fae69f894be1a1720d74f44c3ba0f80cce0d3023ef2c2505ab"
+  },
+  {
+    "id": "u-employee-2",
+    "name": "Sam Scheduler",
+    "role": "employee",
+    "email": "sam.scheduler@example.com",
+    "passwordPlain": "SchedulerPass123!",
+    "passwordSalt": "80e9fa1b3ca44ba25afcb279d6741fa4",
+    "passwordHash": "dc120731080fc3da282b4a099897c60c81b8122d48e56bbdef266bea060bff8c"
+  }
 ]
