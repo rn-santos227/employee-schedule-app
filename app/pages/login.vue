@@ -23,9 +23,6 @@
             :disabled="isSubmitting"
             required
           />
-          <p v-if="formError" class="text-sm text-rose-600">
-            {{ formError }}
-          </p>
           <BaseButton type="submit" variant="primary" size="lg" :disabled="isSubmitting" fullWidth>
             {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
           </BaseButton>
@@ -40,13 +37,14 @@ import { ref } from 'vue'
 import type { Role } from '../../@types/auth'
 import { useAuthStore } from '../../stores/auth'
 import { ROUTES } from '../../constants/routes'
+import { useToast } from '../../composables/useToast'
 
 const auth = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
-const formError = ref('')
+const { addToast } = useToast()
 
 type LoginResponse = {
   userId: string
@@ -55,10 +53,13 @@ type LoginResponse = {
 }
 
 const handleSubmit = async () => {
-  formError.value = ''
-
   if (!email.value || !password.value) {
-    formError.value = 'Enter your email and password.'
+    addToast({
+      title: 'Missing credentials',
+      message: 'Enter your email and password to continue.',
+      variant: 'warning'
+    })
+
     return
   }
 
@@ -77,11 +78,21 @@ const handleSubmit = async () => {
     email.value = ''
     password.value = ''
 
+    addToast({
+      title: 'Signed in',
+      message: `Welcome back, ${response.name}.`,
+      variant: 'success'
+    })
+
     await navigateTo(
       response.role === 'admin' ? ROUTES.adminSchedule : ROUTES.employeeSchedule
     )
   } catch (error) {
-    formError.value = 'The credentials provided are not valid.'
+    addToast({
+      title: 'Login failed',
+      message: 'The credentials provided are not valid.',
+      variant: 'error'
+    })
   } finally {
     isSubmitting.value = false
   }

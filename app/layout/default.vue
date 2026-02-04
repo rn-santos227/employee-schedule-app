@@ -5,5 +5,10 @@
       <slot />
     </main>
     <AppFooter />
+    <ToastStack />
   </div>
 </template>
+
+<script setup lang="ts">
+import ToastStack from '../../components/ui/ToastStack.vue'
+</script>
