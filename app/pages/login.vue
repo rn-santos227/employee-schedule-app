@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-slate-50 px-4 py-12">
-    <div class="mx-auto flex w-full max-w-2xl flex-col gap-6">
+  <div class="flex w-full flex-1 items-center justify-center px-4 py-12">
+    <div class="flex w-full max-w-2xl flex-col gap-6">
       <BaseCard
         title="Employee Schedule Portal"
         subtitle="Sign in to manage employee schedules."
@@ -12,7 +12,7 @@
             type="email"
             label="Email"
             placeholder="you@example.com"
-          :disabled="isSubmitting"
+            :disabled="isSubmitting"
             required
           />
           <BaseTextField
