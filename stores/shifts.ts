@@ -16,4 +16,11 @@ export const useShiftsStore = defineStore('shifts', {
     byEmployeeId: (state) => (employeeId: string) =>
       state.shifts.filter((shift) => shift.employeeId === employeeId)
   },
+
+  actions: {
+    persist() {
+      if (typeof window === 'undefined') return
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.shifts))
+    },
+  }
 })
