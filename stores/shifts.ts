@@ -18,6 +18,37 @@ export const useShiftsStore = defineStore('shifts', {
   },
 
   actions: {
+    ensureLoaded() {
+      if (this.loaded) return
+      this.load()
+    },
+
+    load() {
+      if (this.loaded) return
+      this.loaded = true
+
+      if (typeof window === 'undefined') return
+
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) {
+        this.shifts = [...seedShifts]
+        this.persist()
+        return
+      }
+
+      try {
+        const parsed = JSON.parse(raw) as Shift[]
+        if (!Array.isArray(parsed)) {
+          throw new Error('Invalid shifts payload')
+        }
+        this.shifts = parsed
+      } catch {
+        localStorage.removeItem(STORAGE_KEY)
+        this.shifts = [...seedShifts]
+        this.persist()
+      }
+    },
+
     persist() {
       if (typeof window === 'undefined') return
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.shifts))
