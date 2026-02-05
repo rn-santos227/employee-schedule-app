@@ -90,17 +90,40 @@ const closeModal = () => {
   activeUser.value = null
 }
 
-const handleSave = (payload: Omit<User, 'id'>) => {
+const handleSave = async (payload: Omit<User, 'id'>) => {
   const patch = { ...payload }
   if (activeUser.value && !patch.passwordPlain) {
     delete patch.passwordPlain
   }
 
-  if (activeUser.value) {
+  const isUpdate = Boolean(activeUser.value)
+  const targetName = (isUpdate ? activeUser.value?.name : patch.name) ?? 'this user'
+
+  const confirmation = await showDialog({
+    type: 'question',
+    title: isUpdate ? 'Update user?' : 'Create user?',
+    message: isUpdate
+      ? `Save changes for ${targetName}?`
+      : `Create a new user profile for ${targetName}?`,
+    confirmLabel: isUpdate ? 'Save' : 'Create'
+  })
+
+  if (!confirmation.confirmed) {
+    return
+  }
+
+  if (isUpdate && activeUser.value) {
     usersStore.update(activeUser.value.id, patch)
   } else {
     usersStore.create(patch)
   }
+
+  await showDialog({
+    type: 'success',
+    title: isUpdate ? 'User updated' : 'User created',
+    message: `${targetName} has been ${isUpdate ? 'updated' : 'created'} successfully.`,
+    confirmLabel: 'Done'
+  })
 
   closeModal()
 }
@@ -118,5 +141,12 @@ const handleDelete = async (user: User) => {
   }
 
   usersStore.remove(user.id)
+
+  await showDialog({
+    type: 'success',
+    title: 'User deleted',
+    message: `${user.name} has been removed.`,
+    confirmLabel: 'Done'
+  })
 }
 </script>
