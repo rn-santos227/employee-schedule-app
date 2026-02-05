@@ -10,4 +10,9 @@ export const useUsersStore = defineStore('users', {
     users: [] as User[],
     loaded: false
   }),
+
+  getters: {
+    byId: (state) => (id: string) => state.users.find((user) => user.id === id),
+    employees: (state) => state.users.filter((user) => user.role === 'employee')
+  },
 })
