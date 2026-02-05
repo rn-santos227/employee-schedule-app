@@ -45,10 +45,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { navigateTo } from 'nuxt/app'
 import { useAuthStore } from '../../stores/auth'
 import { ROUTES } from '../../constants/routes'
+import { useLoadingStore } from '../../stores/loading'
 
 const auth = useAuthStore()
 const isOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
+const loadingStore = useLoadingStore()
 
 const closeMenu = () => {
   isOpen.value = false
@@ -69,9 +71,15 @@ const handleOutsideClick = (event: MouseEvent) => {
 }
 
 const handleLogout = async () => {
-  auth.logout()
-  closeMenu()
-  await navigateTo(ROUTES.login)
+  loadingStore.start('Signing you out...')
+
+  try {
+    auth.logout()
+    closeMenu()
+    await navigateTo(ROUTES.login)
+  } finally {
+    loadingStore.stop()
+  }
 }
 
 onMounted(() => {

@@ -55,12 +55,14 @@ import { onMounted, ref } from 'vue'
 import type { User } from '../../../@types/user'
 import { useUsersStore } from '../../../stores/users'
 import { useDialog } from '../../../composables/useDialog'
+import { useLoadingStore } from '../../../stores/loading'
 import adminMiddleware from '../../../middleware/admin'
 
 definePageMeta({ middleware: [adminMiddleware] })
 
 const usersStore = useUsersStore()
 const { showDialog } = useDialog()
+const loadingStore = useLoadingStore()
 
 const isModalOpen = ref(false)
 const activeUser = ref<User | null>(null)
@@ -112,10 +114,16 @@ const handleSave = async (payload: Omit<User, 'id'>) => {
     return
   }
 
-  if (isUpdate && activeUser.value) {
-    usersStore.update(activeUser.value.id, patch)
-  } else {
-    usersStore.create(patch)
+  loadingStore.start(isUpdate ? 'Updating employee profile...' : 'Creating employee profile...')
+
+  try {
+    if (isUpdate && activeUser.value) {
+      usersStore.update(activeUser.value.id, patch)
+    } else {
+      usersStore.create(patch)
+    }
+  } finally {
+    loadingStore.stop()
   }
 
   await showDialog({

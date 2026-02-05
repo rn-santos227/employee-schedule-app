@@ -38,12 +38,14 @@ import type { Role } from '../../@types/auth'
 import { useAuthStore } from '../../stores/auth'
 import { ROUTES } from '../../constants/routes'
 import { useToast } from '../../composables/useToast'
+import { useLoadingStore } from '../../stores/loading'
 
 const auth = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
+const loadingStore = useLoadingStore()
 const { addToast } = useToast()
 
 type LoginResponse = {
@@ -64,6 +66,7 @@ const handleSubmit = async () => {
   }
 
   isSubmitting.value = true
+  loadingStore.start('Signing you in...')
 
   try {
     const response = await $fetch<LoginResponse>('/api/auth/login', {
@@ -95,6 +98,7 @@ const handleSubmit = async () => {
     })
   } finally {
     isSubmitting.value = false
+    loadingStore.stop()
   }
 }
 </script>
