@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import type { User } from '../@types/user'
 import usersData from '../data/users.json'
 
-const defaultUsers = usersData as User[]
+const STORAGE_KEY = 'ms_users'
+const seedUsers = usersData as User[]
 
 export const useUsersStore = defineStore('users', {
   state: () => ({
-    users: defaultUsers
-  })
+    users: [] as User[],
+    loaded: false
+  }),
 })
