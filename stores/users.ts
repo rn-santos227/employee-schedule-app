@@ -15,4 +15,11 @@ export const useUsersStore = defineStore('users', {
     byId: (state) => (id: string) => state.users.find((user) => user.id === id),
     employees: (state) => state.users.filter((user) => user.role === 'employee')
   },
+
+  actions: {
+    persist() {
+      if (typeof window === 'undefined') return
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.users))
+    },
+  },
 })
