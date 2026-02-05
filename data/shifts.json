@@ -1,0 +1,52 @@
+[
+  {
+    "id": "s-1001",
+    "employeeId": "u-employee-1",
+    "employeeName": "Erin Employee",
+    "title": "Opening shift",
+    "start": "2026-02-02T08:00:00",
+    "end": "2026-02-02T16:00:00",
+    "location": "Front desk",
+    "color": "#dbeafe"
+  },
+  {
+    "id": "s-1002",
+    "employeeId": "u-employee-1",
+    "employeeName": "Erin Employee",
+    "title": "Inventory prep",
+    "start": "2026-02-04T10:00:00",
+    "end": "2026-02-04T14:00:00",
+    "location": "Back office",
+    "color": "#dcfce7"
+  },
+  {
+    "id": "s-1003",
+    "employeeId": "u-employee-1",
+    "employeeName": "Erin Employee",
+    "title": "Weekend support",
+    "start": "2026-02-08T12:00:00",
+    "end": "2026-02-08T18:00:00",
+    "location": "Store floor",
+    "color": "#fef3c7"
+  },
+  {
+    "id": "s-1004",
+    "employeeId": "u-employee-2",
+    "employeeName": "Sam Scheduler",
+    "title": "Customer support",
+    "start": "2026-02-03T09:00:00",
+    "end": "2026-02-03T17:00:00",
+    "location": "Help desk",
+    "color": "#fce7f3"
+  },
+  {
+    "id": "s-1005",
+    "employeeId": "u-employee-2",
+    "employeeName": "Sam Scheduler",
+    "title": "Closing shift",
+    "start": "2026-02-06T13:00:00",
+    "end": "2026-02-06T21:00:00",
+    "location": "Store front",
+    "color": "#e0e7ff"
+  }
+]
