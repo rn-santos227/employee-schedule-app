@@ -11,4 +11,9 @@ export const useShiftsStore = defineStore('shifts', {
     loaded: false
   }),
 
+  getters: {
+    byId: (state) => (id: string) => state.shifts.find((shift) => shift.id === id),
+    byEmployeeId: (state) => (employeeId: string) =>
+      state.shifts.filter((shift) => shift.employeeId === employeeId)
+  },
 })
