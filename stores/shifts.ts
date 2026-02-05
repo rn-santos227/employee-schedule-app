@@ -53,5 +53,42 @@ export const useShiftsStore = defineStore('shifts', {
       if (typeof window === 'undefined') return
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.shifts))
     },
+
+    create(shift: Omit<Shift, 'id'>) {
+      this.ensureLoaded()
+      const newShift: Shift = {
+        ...shift,
+        id: crypto.randomUUID()
+      }
+
+      this.shifts = [...this.shifts, newShift]
+      this.persist()
+      return newShift
+    },
+
+    update(id: string, patch: Partial<Shift>) {
+      this.ensureLoaded()
+      this.shifts = this.shifts.map((shift) =>
+        shift.id === id
+          ? {
+              ...shift,
+              ...patch
+            }
+          : shift
+      )
+      this.persist()
+    },
+
+    remove(id: string) {
+      this.ensureLoaded()
+      this.shifts = this.shifts.filter((shift) => shift.id !== id)
+      this.persist()
+    },
+
+    resetToSeed() {
+      this.ensureLoaded()
+      this.shifts = [...seedShifts]
+      this.persist()
+    }
   }
 })
