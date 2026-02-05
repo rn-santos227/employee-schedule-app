@@ -11,30 +11,32 @@
       <span class="text-xs" aria-hidden="true">▾</span>
     </button>
 
-    <div
-      v-if="isOpen"
-      class="absolute right-0 z-10 mt-2 w-48 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
-      role="menu"
-      aria-label="Main menu"
-    >
-      <NuxtLink
-        :to="auth.isAdmin ? ROUTES.adminUsers : ROUTES.employeeSchedule"
-        class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
-        role="menuitem"
-        @click="closeMenu"
+    <Transition name="dropdown-slide">
+      <div
+        v-if="isOpen"
+        class="absolute right-0 z-10 mt-2 w-48 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
+        role="menu"
+        aria-label="Main menu"
       >
-        {{ auth.isAdmin ? 'Manage Users' : 'My Schedule' }}
-      </NuxtLink>
+        <NuxtLink
+          :to="auth.isAdmin ? ROUTES.adminUsers : ROUTES.employeeSchedule"
+          class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+          role="menuitem"
+          @click="closeMenu"
+        >
+          {{ auth.isAdmin ? 'Manage Users' : 'My Schedule' }}
+        </NuxtLink>
 
-      <button
-        type="button"
-        class="block w-full px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-        role="menuitem"
-        @click="handleLogout"
-      >
-        Sign out
-      </button>
-    </div>
+        <button
+          type="button"
+          class="block w-full px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+          role="menuitem"
+          @click="handleLogout"
+        >
+          Sign out
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
