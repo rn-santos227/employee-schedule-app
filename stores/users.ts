@@ -76,5 +76,11 @@ export const useUsersStore = defineStore('users', {
       )
       this.persist()
     },
+
+    remove(id: string) {
+      this.ensureLoaded()
+      this.users = this.users.filter((user) => user.id !== id)
+      this.persist()
+    }
   },
 })
