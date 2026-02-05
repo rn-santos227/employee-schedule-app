@@ -52,5 +52,16 @@ export const useUsersStore = defineStore('users', {
       if (typeof window === 'undefined') return
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.users))
     },
+
+    create(user: Omit<User, 'id'>) {
+      this.ensureLoaded()
+      const newUser: User = {
+        ...user,
+        id: crypto.randomUUID()
+      }
+      this.users = [...this.users, newUser]
+      this.persist()
+      return newUser
+    },
   },
 })
