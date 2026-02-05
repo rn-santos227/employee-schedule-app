@@ -52,8 +52,8 @@ export const useCalendar = ({ shifts, initialMode = 'week' }: UseCalendarOptions
     }
 
     if (activeMode.value === 'week') {
-      const start = weekDays.value[0]
-      const end = weekDays.value[6]
+      const start = weekDays.value[0] ?? activeDate.value
+      const end = weekDays.value[6] ?? start
       return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
