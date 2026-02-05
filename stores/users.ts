@@ -17,6 +17,11 @@ export const useUsersStore = defineStore('users', {
   },
 
   actions: {
+    ensureLoaded() {
+      if (this.loaded) return
+      this.load()
+    },
+
     load() {
       if (this.loaded) return
       this.loaded = true
