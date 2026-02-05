@@ -1,5 +1,5 @@
 export const ROUTES = {
   login: '/login',
-  adminSchedule: '/admin/schedule',
+  adminUsers: '/admin/users',
   employeeSchedule: '/employee/schedule'
 } as const
