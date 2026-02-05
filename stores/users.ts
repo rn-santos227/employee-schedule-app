@@ -63,5 +63,18 @@ export const useUsersStore = defineStore('users', {
       this.persist()
       return newUser
     },
+
+    update(id: string, patch: Partial<User>) {
+      this.ensureLoaded()
+      this.users = this.users.map((user) =>
+        user.id === id
+          ? {
+              ...user,
+              ...patch
+            }
+          : user
+      )
+      this.persist()
+    },
   },
 })
