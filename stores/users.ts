@@ -17,6 +17,32 @@ export const useUsersStore = defineStore('users', {
   },
 
   actions: {
+    load() {
+      if (this.loaded) return
+      this.loaded = true
+
+      if (typeof window === 'undefined') return
+
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) {
+        this.users = [...seedUsers]
+        this.persist()
+        return
+      }
+
+      try {
+        const parsed = JSON.parse(raw) as User[]
+        if (!Array.isArray(parsed)) {
+          throw new Error('Invalid users payload')
+        }
+        this.users = parsed
+      } catch {
+        localStorage.removeItem(STORAGE_KEY)
+        this.users = [...seedUsers]
+        this.persist()
+      }
+    },
+
     persist() {
       if (typeof window === 'undefined') return
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.users))
