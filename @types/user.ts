@@ -5,4 +5,6 @@ export type User = {
   email: string
   name: string
   role: Role
+  timezone?: string
+  passwordPlain?: string
 }
