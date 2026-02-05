@@ -8,6 +8,10 @@ export default defineNuxtRouteMiddleware(() => {
   const auth = useAuthStore()
   auth.load()
 
+  if (!auth.isAuthed) {
+    return navigateTo(ROUTES.login)
+  }
+
   if (!auth.isAdmin) {
     return navigateTo(ROUTES.employeeSchedule)
   }

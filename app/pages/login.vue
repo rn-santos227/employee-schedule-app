@@ -85,7 +85,7 @@ const handleSubmit = async () => {
     })
 
     await navigateTo(
-      response.role === 'admin' ? ROUTES.adminSchedule : ROUTES.employeeSchedule
+      response.role === 'admin' ? ROUTES.adminUsers : ROUTES.employeeSchedule
     )
   } catch (error) {
     addToast({

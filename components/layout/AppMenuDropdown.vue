@@ -18,13 +18,12 @@
       aria-label="Main menu"
     >
       <NuxtLink
-        v-if="auth.isAdmin"
-        to="/admin/users"
+        :to="auth.isAdmin ? ROUTES.adminUsers : ROUTES.employeeSchedule"
         class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
         role="menuitem"
         @click="closeMenu"
       >
-        Manage Users
+        {{ auth.isAdmin ? 'Manage Users' : 'My Schedule' }}
       </NuxtLink>
 
       <button
