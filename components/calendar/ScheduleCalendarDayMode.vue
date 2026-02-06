@@ -19,6 +19,7 @@
           :shift="shift"
           :day-height="960"
           :readonly="readonly"
+          :time-zone="timeZone"
           @select="emit('shiftSelect', $event)"
           @update="(shift, patch) => emit('shiftUpdate', shift, patch)"
         />
@@ -50,6 +51,7 @@ const props = defineProps<{
   headerLabel: string
   formatHour: (hour: number) => string
   dragPreview: DragPreview | null
+  timeZone: string
 }>()
 
 const emit = defineEmits<{

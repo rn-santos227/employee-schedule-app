@@ -7,6 +7,10 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <div class="min-w-56">
+          <BaseSelect v-model="selectedTimeZone" :options="timeZoneOptions" label="Timezone" />
+        </div>
+
         <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
           <button
             v-for="mode in modes"
@@ -33,9 +37,10 @@
       :hours="hours"
       :day-shifts="dayShifts"
       :readonly="readonly"
-      :header-label="`${formatWeekday(activeDate)}, ${formatMonthDay(activeDate)}`"
+      :header-label="`${formatWeekday(activeDate, selectedTimeZone)}, ${formatMonthDay(activeDate, selectedTimeZone)}`"
       :format-hour="formatHour"
       :drag-preview="dragPreview"
+      :time-zone="selectedTimeZone"
       @create-mouse-down="startCreateFromDay"
       @shift-select="emitShift"
       @shift-update="emitShiftUpdate"
@@ -47,11 +52,12 @@
       :hours="hours"
       :readonly="readonly"
       :shifts-by-day-key="shiftsByDayKey"
-      :day-key="dayKey"
-      :format-weekday="formatWeekday"
-      :format-month-day="formatMonthDay"
+      :day-key="(date) => dayKey(date, selectedTimeZone)"
+      :format-weekday="(date, short) => formatWeekday(date, selectedTimeZone, short)"
+      :format-month-day="(date) => formatMonthDay(date, selectedTimeZone)"
       :format-hour="formatHour"
       :drag-preview="dragPreview"
+      :time-zone="selectedTimeZone"
       @create-mouse-down="startCreateFromWeek"
       @shift-select="emitShift"
       @shift-update="emitShiftUpdate"
@@ -64,19 +70,22 @@
       :active-date="activeDate"
       :readonly="readonly"
       :shifts-by-day-key="shiftsByDayKey"
-      :day-key="dayKey"
-      :format-hour-minute="formatHourMinute"
-      :is-same-month="isSameMonth"
-      :is-today="isToday"
+      :day-key="(date) => dayKey(date, selectedTimeZone)"
+      :format-hour-minute="(isoDate) => formatHourMinute(isoDate, selectedTimeZone)"
+      :is-same-month="(left, right) => isSameMonth(left, right, selectedTimeZone)"
+      :is-today="(date) => isToday(date, selectedTimeZone)"
       @shift-select="emitShift"
     />
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { CalendarMode, Shift } from '../../@types/shift'
 import { useCalendar } from '../../composables/useCalendar'
+import { normalizeTimeZone } from '../../utils/timezone'
+import timezoneList from '../../data/tomezones.json'
+import BaseSelect from '../ui/BaseSelect.vue'
 import ScheduleCalendarDayMode from './ScheduleCalendarDayMode.vue'
 import ScheduleCalendarMonthMode from './ScheduleCalendarMonthMode.vue'
 import ScheduleCalendarWeekMode from './ScheduleCalendarWeekMode.vue'
@@ -86,10 +95,12 @@ const props = withDefaults(
     shifts: Shift[]
     readonly?: boolean
     initialMode?: CalendarMode
+    defaultTimeZone?: string
   }>(),
   {
     readonly: false,
-    initialMode: 'week'
+    initialMode: 'week',
+    defaultTimeZone: 'UTC'
   }
 )
 
@@ -98,6 +109,9 @@ const emit = defineEmits<{
   shiftCreate: [{ start: string; end: string }]
   shiftUpdate: [Shift, { start: string; end: string }]
 }>()
+
+const selectedTimeZone = ref(normalizeTimeZone(props.defaultTimeZone))
+const timeZoneOptions = computed(() => (timezoneList as string[]).map((timeZone) => ({ label: timeZone, value: timeZone })))
 
 const {
   modes,
@@ -120,10 +134,12 @@ const {
   formatHour,
   formatHourMinute,
   isSameMonth,
-  isToday
+  isToday,
+  toIsoInTimeZone
 } = useCalendar({
   shifts: () => props.shifts,
-  initialMode: props.initialMode
+  initialMode: props.initialMode,
+  timeZone: selectedTimeZone
 })
 
 type DragPreview = {
@@ -176,17 +192,9 @@ const attachCreateDrag = (event: MouseEvent, baseDate: Date, dayHeight: number, 
       return
     }
 
-    const shiftStart = new Date(baseDate)
-    shiftStart.setHours(0, 0, 0, 0)
-    shiftStart.setMinutes(dragPreview.value.startMinutes)
-
-    const shiftEnd = new Date(baseDate)
-    shiftEnd.setHours(0, 0, 0, 0)
-    shiftEnd.setMinutes(Math.max(dragPreview.value.startMinutes + 30, dragPreview.value.endMinutes))
-
     emit('shiftCreate', {
-      start: shiftStart.toISOString(),
-      end: shiftEnd.toISOString()
+      start: toIsoInTimeZone(baseDate, dragPreview.value.startMinutes),
+      end: toIsoInTimeZone(baseDate, Math.max(dragPreview.value.startMinutes + 30, dragPreview.value.endMinutes))
     })
 
     dragPreview.value = null

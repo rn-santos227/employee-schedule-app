@@ -4,6 +4,7 @@
       <BaseCard :title="cardTitle" subtitle="Drag to create shifts. Drag or resize existing cards to update timing.">
         <ScheduleCalendar
           :shifts="employeeShifts"
+          :default-time-zone="employeeTimeZone"
           initial-mode="week"
           @shift-click="openEditModal"
           @shift-create="openCreateModal"
@@ -48,6 +49,7 @@ usersStore.ensureLoaded()
 shiftsStore.ensureLoaded()
 
 const employeeId = computed(() => String(route.params.id ?? ''))
+const employeeTimeZone = computed(() => employee.value?.timezone ?? 'UTC')
 const employee = computed(() => usersStore.byId(employeeId.value))
 
 watchEffect(async () => {

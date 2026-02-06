@@ -2,7 +2,7 @@
   <div class="flex w-full flex-1 justify-center px-4 py-8">
     <div class="w-full max-w-6xl">
       <BaseCard :title="cardTitle" subtitle="View assigned shifts across day, week, and month.">
-        <ScheduleCalendar :shifts="employeeShifts" :readonly="true" initial-mode="week" />
+        <ScheduleCalendar :shifts="employeeShifts" :default-time-zone="employeeTimeZone" :readonly="true" initial-mode="week" />
       </BaseCard>
     </div>
   </div>
@@ -48,6 +48,7 @@ watchEffect(async () => {
 })
 
 const employeeShifts = computed(() => shiftsStore.byEmployeeId(pageEmployeeId.value))
+const employeeTimeZone = computed(() => employee.value?.timezone ?? 'UTC')
 const cardTitle = computed(() => {
   if (auth.isAdmin) {
     return `Employee schedule: ${employee.value?.name ?? 'Employee'}`
