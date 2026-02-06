@@ -2,7 +2,7 @@
   <div class="flex w-full flex-1 justify-center px-4 py-8">
     <div class="w-full max-w-5xl space-y-6">
       <BaseCard title="User management" subtitle="Create and manage admin or employee profiles.">
-        <DataTable :columns="columns" :rows="usersStore.users">
+        <DataTable :columns="columns" :rows="managedUsers">
           <template #table-actions>
             <BaseButton variant="primary" @click="openCreate">Create user</BaseButton>
           </template>
@@ -18,7 +18,7 @@
           </template>
           <template #row-actions="{ row }">
             <div class="flex items-center justify-end gap-2">
-              <BaseButton
+            <BaseButton
                 variant="secondary"
                 size="sm"
                 icon-only

@@ -14,7 +14,7 @@
     <Transition name="dropdown-slide">
       <div
         v-if="isOpen"
-        class="absolute right-0 z-10 mt-2 w-48 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
+        class="absolute right-0 z-10 mt-2 w-56 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
         role="menu"
         aria-label="Main menu"
       >
@@ -29,6 +29,15 @@
 
         <button
           type="button"
+          class="block w-full px-4 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+          role="menuitem"
+          @click="openProfile"
+        >
+          My profile
+        </button>
+
+        <button
+          type="button"
           class="block w-full px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
           @click="handleLogout"
@@ -37,20 +46,34 @@
         </button>
       </div>
     </Transition>
+
+    <UserProfileModal v-if="isProfileOpen && currentUser" :user="currentUser" @close="closeProfile" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { navigateTo } from 'nuxt/app'
 import { useAuthStore } from '../../stores/auth'
 import { ROUTES } from '../../constants/routes'
 import { useLoadingStore } from '../../stores/loading'
+import { useUsersStore } from '../../stores/users'
 
 const auth = useAuthStore()
+const usersStore = useUsersStore()
 const isOpen = ref(false)
+const isProfileOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
 const loadingStore = useLoadingStore()
+
+const currentUser = computed(() => {
+  if (!auth.userId) {
+    return null
+  }
+
+  usersStore.ensureLoaded()
+  return usersStore.byId(auth.userId) ?? null
+})
 
 const closeMenu = () => {
   isOpen.value = false
@@ -58,6 +81,15 @@ const closeMenu = () => {
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
+}
+
+const openProfile = () => {
+  closeMenu()
+  isProfileOpen.value = true
+}
+
+const closeProfile = () => {
+  isProfileOpen.value = false
 }
 
 const handleOutsideClick = (event: MouseEvent) => {
@@ -76,6 +108,7 @@ const handleLogout = async () => {
   try {
     auth.logout()
     closeMenu()
+    closeProfile()
     await navigateTo(ROUTES.login)
   } finally {
     loadingStore.stop()
