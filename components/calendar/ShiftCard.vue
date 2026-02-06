@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Shift } from '../../@types/shift'
+import { getMinutesInTimeZoneDay, normalizeTimeZone } from '../../utils/timezone'
 
 type DragMode = 'move' | 'resize'
 
@@ -30,6 +31,7 @@ const props = defineProps<{
   shift: Shift
   dayHeight: number
   readonly?: boolean
+  timeZone?: string
 }>()
 
 const emit = defineEmits<{
@@ -37,10 +39,12 @@ const emit = defineEmits<{
   update: [Shift, { start: string; end: string }]
 }>()
 
+const resolvedTimeZone = computed(() => normalizeTimeZone(props.timeZone))
+
 const style = computed(() => {
   const start = new Date(props.shift.start)
   const end = new Date(props.shift.end)
-  const top = ((start.getHours() * 60 + start.getMinutes()) / (24 * 60)) * props.dayHeight
+  const top = (getMinutesInTimeZoneDay(start, resolvedTimeZone.value) / (24 * 60)) * props.dayHeight
   const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000)
   const height = (durationMinutes / (24 * 60)) * props.dayHeight
 
@@ -113,7 +117,8 @@ const formatTimeRange = (startIso: string, endIso: string) => {
   const format = (value: string) =>
     new Date(value).toLocaleTimeString(undefined, {
       hour: 'numeric',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: resolvedTimeZone.value
     })
 
   return `${format(startIso)} - ${format(endIso)}`
