@@ -4,6 +4,7 @@ import shiftsData from '../data/shifts.json'
 
 const STORAGE_KEY = 'ms_shifts'
 const seedShifts = shiftsData as Shift[]
+const sortByStart = (shifts: Shift[]) => [...shifts].sort((left, right) => left.start.localeCompare(right.start))
 
 export const useShiftsStore = defineStore('shifts', {
   state: () => ({
@@ -14,7 +15,10 @@ export const useShiftsStore = defineStore('shifts', {
   getters: {
     byId: (state) => (id: string) => state.shifts.find((shift) => shift.id === id),
     byEmployeeId: (state) => (employeeId: string) =>
-      state.shifts.filter((shift) => shift.employeeId === employeeId)
+      sortByStart(state.shifts.filter((shift) => shift.employeeId === employeeId)),
+    forUser() {
+      return (userId: string) => this.byEmployeeId(userId)
+    }
   },
 
   actions: {
@@ -31,7 +35,7 @@ export const useShiftsStore = defineStore('shifts', {
 
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) {
-        this.shifts = [...seedShifts]
+        this.shifts = sortByStart([...seedShifts])
         this.persist()
         return
       }
@@ -41,10 +45,10 @@ export const useShiftsStore = defineStore('shifts', {
         if (!Array.isArray(parsed)) {
           throw new Error('Invalid shifts payload')
         }
-        this.shifts = parsed
+        this.shifts = sortByStart(parsed)
       } catch {
         localStorage.removeItem(STORAGE_KEY)
-        this.shifts = [...seedShifts]
+        this.shifts = sortByStart([...seedShifts])
         this.persist()
       }
     },
@@ -61,20 +65,22 @@ export const useShiftsStore = defineStore('shifts', {
         id: crypto.randomUUID()
       }
 
-      this.shifts = [...this.shifts, newShift]
+      this.shifts = sortByStart([...this.shifts, newShift])
       this.persist()
       return newShift
     },
 
     update(id: string, patch: Partial<Shift>) {
       this.ensureLoaded()
-      this.shifts = this.shifts.map((shift) =>
-        shift.id === id
-          ? {
-              ...shift,
-              ...patch
-            }
-          : shift
+      this.shifts = sortByStart(
+        this.shifts.map((shift) =>
+          shift.id === id
+            ? {
+                ...shift,
+                ...patch
+              }
+            : shift
+        )
       )
       this.persist()
     },
@@ -87,7 +93,7 @@ export const useShiftsStore = defineStore('shifts', {
 
     resetToSeed() {
       this.ensureLoaded()
-      this.shifts = [...seedShifts]
+      this.shifts = sortByStart([...seedShifts])
       this.persist()
     }
   }
