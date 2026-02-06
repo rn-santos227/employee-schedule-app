@@ -5,9 +5,9 @@
       <slot />
     </main>
     <AppFooter />
+    <ModalStack />
     <ToastStack />
     <DialogStack />
-    <ModalStack />
   </div>
 </template>
 
