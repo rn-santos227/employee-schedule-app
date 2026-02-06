@@ -1,29 +1,22 @@
 <template>
-  <div class="flex w-full flex-1 justify-center px-4 py-8">
-    <div class="w-full max-w-6xl">
-      <BaseCard title="My schedule" subtitle="View your assigned shifts across day, week, and month.">
-        <ScheduleCalendar :shifts="myShifts" :readonly="true" initial-mode="week" />
-      </BaseCard>
-    </div>
+  <div class="flex w-full flex-1 items-center justify-center px-4 py-8">
+    <BaseCard title="Redirecting" subtitle="Loading your schedule..." />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Shift } from '../../../@types/shift'
+import { watchEffect } from 'vue'
+import { ROUTES } from '../../../constants/routes'
 import { useAuthStore } from '../../../stores/auth'
-import { useShiftsStore } from '../../../stores/shifts'
 
 const auth = useAuthStore()
-const shiftsStore = useShiftsStore()
+auth.load()
 
-shiftsStore.ensureLoaded()
-
-const myShifts = computed<Shift[]>(() => {
+watchEffect(async () => {
   if (!auth.userId) {
-    return []
+    await navigateTo(ROUTES.login)
+    return
   }
-
-  return shiftsStore.byEmployeeId(auth.userId)
+  await navigateTo(ROUTES.employeeScheduleById(auth.userId), { replace: true })
 })
 </script>
