@@ -10,7 +10,7 @@
   >
     <p class="truncate font-semibold text-slate-900">{{ shift.title }}</p>
     <p class="truncate text-slate-700">{{ shift.employeeName }}</p>
-    <p class="truncate text-slate-600">{{ formatTimeRange(shift.start, shift.end) }}</p>
+    <p class="truncate text-slate-600">{{ displayedTimeRange }}</p>
 
     <span
       class="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize bg-slate-900/20"
@@ -32,6 +32,8 @@ const props = defineProps<{
   dayHeight: number
   readonly?: boolean
   timeZone?: string
+  displayStart?: string
+  displayEnd?: string
 }>()
 
 const emit = defineEmits<{
@@ -40,12 +42,12 @@ const emit = defineEmits<{
 }>()
 
 const resolvedTimeZone = computed(() => normalizeTimeZone(props.timeZone))
+const effectiveStart = computed(() => new Date(props.displayStart ?? props.shift.start))
+const effectiveEnd = computed(() => new Date(props.displayEnd ?? props.shift.end))
 
 const style = computed(() => {
-  const start = new Date(props.shift.start)
-  const end = new Date(props.shift.end)
-  const top = (getMinutesInTimeZoneDay(start, resolvedTimeZone.value) / (24 * 60)) * props.dayHeight
-  const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000)
+  const top = (getMinutesInTimeZoneDay(effectiveStart.value, resolvedTimeZone.value) / (24 * 60)) * props.dayHeight
+  const durationMinutes = Math.max(30, (effectiveEnd.value.getTime() - effectiveStart.value.getTime()) / 60000)
   const height = (durationMinutes / (24 * 60)) * props.dayHeight
 
   return {
@@ -123,4 +125,6 @@ const formatTimeRange = (startIso: string, endIso: string) => {
 
   return `${format(startIso)} - ${format(endIso)}`
 }
+
+const displayedTimeRange = computed(() => formatTimeRange(effectiveStart.value.toISOString(), effectiveEnd.value.toISOString()))
 </script>

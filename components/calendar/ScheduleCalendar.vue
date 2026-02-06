@@ -51,6 +51,7 @@
       :week-days="weekDays"
       :hours="hours"
       :readonly="readonly"
+      :shifts="shifts"
       :shifts-by-day-key="shiftsByDayKey"
       :day-key="(date) => dayKey(date, selectedTimeZone)"
       :format-weekday="(date, short) => formatWeekday(date, selectedTimeZone, short)"

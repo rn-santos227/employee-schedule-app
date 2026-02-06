@@ -24,12 +24,14 @@
           @mousedown="emit('createMouseDown', $event, day, index)"
         >
           <ShiftCard
-            v-for="shift in shiftsByDayKey[dayKey(day)] ?? []"
-            :key="shift.id"
-            :shift="shift"
+            v-for="segment in shiftsByWeekDay[dayKey(day)] ?? []"
+            :key="`${segment.shift.id}-${segment.displayStart}`"
+            :shift="segment.shift"
             :day-height="720"
             :readonly="readonly"
             :time-zone="timeZone"
+            :display-start="segment.displayStart"
+            :display-end="segment.displayEnd"
             @select="emit('shiftSelect', $event)"
             @update="(shift, patch) => emit('shiftUpdate', shift, patch)"
           />
@@ -48,6 +50,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Shift } from '../../@types/shift'
+import { zonedDateTimeToUtc } from '../../utils/timezone'
 import ShiftCard from './ShiftCard.vue'
 
 type DragPreview = {
@@ -56,10 +59,17 @@ type DragPreview = {
   dayIndex?: number
 }
 
+type ShiftSegment = {
+  shift: Shift
+  displayStart: string
+  displayEnd: string
+}
+
 const props = defineProps<{
   weekDays: Date[]
   hours: number[]
   readonly: boolean
+  shifts: Shift[]
   shiftsByDayKey: Record<string, Shift[]>
   dayKey: (date: Date) => string
   formatWeekday: (date: Date, short?: boolean) => string
@@ -87,5 +97,43 @@ const dragPreviewStyle = computed(() => {
     top: `${top}px`,
     height: `${Math.max(12, height)}px`
   }
+})
+
+const shiftsByWeekDay = computed(() => {
+  return props.weekDays.reduce<Record<string, ShiftSegment[]>>((acc, day) => {
+    const currentDayKey = props.dayKey(day)
+    const [year, month, dayOfMonth] = currentDayKey.split('-').map((part) => Number(part))
+
+    if (!year || !month || !dayOfMonth) {
+      acc[currentDayKey] = []
+      return acc
+    }
+
+    const dayStart = zonedDateTimeToUtc(props.timeZone, year, month, dayOfMonth, 0, 0, 0)
+    const dayEnd = zonedDateTimeToUtc(props.timeZone, year, month, dayOfMonth + 1, 0, 0, 0)
+
+    const segments = props.shifts
+      .map((shift) => {
+        const shiftStart = new Date(shift.start)
+        const shiftEnd = new Date(shift.end)
+        const overlapStart = Math.max(shiftStart.getTime(), dayStart.getTime())
+        const overlapEnd = Math.min(shiftEnd.getTime(), dayEnd.getTime())
+
+        if (overlapEnd <= overlapStart) {
+          return null
+        }
+
+        return {
+          shift,
+          displayStart: new Date(overlapStart).toISOString(),
+          displayEnd: new Date(overlapEnd).toISOString()
+        }
+      })
+      .filter((segment): segment is ShiftSegment => Boolean(segment))
+      .sort((left, right) => left.displayStart.localeCompare(right.displayStart))
+
+    acc[currentDayKey] = segments
+    return acc
+  }, {})
 })
 </script>
