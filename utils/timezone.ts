@@ -45,7 +45,11 @@ const getFormatter = (timeZone: string) => {
 const getZonedParts = (date: Date, timeZone: string): ZonedParts => {
   const formatter = getFormatter(timeZone)
   const parts = formatter.formatToParts(date)
-  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const lookup = parts.reduce<Record<string, string>>((acc, part) => {
+    acc[part.type] = part.value
+    return acc
+  }, {})
+  const weekdayLabel = lookup.weekday ?? ''
 
   return {
     year: Number(lookup.year),
@@ -54,7 +58,7 @@ const getZonedParts = (date: Date, timeZone: string): ZonedParts => {
     hour: Number(lookup.hour),
     minute: Number(lookup.minute),
     second: Number(lookup.second),
-    weekday: weekdayIndexMap[lookup.weekday] ?? 0
+    weekday: weekdayIndexMap[weekdayLabel] ?? 0
   }
 }
 

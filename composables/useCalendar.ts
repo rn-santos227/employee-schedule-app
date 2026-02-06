@@ -1,13 +1,26 @@
 import { computed, ref, toValue } from 'vue'
 import type { MaybeRefOrGetter } from 'vue'
 import type { CalendarMode, Shift } from '../@types/shift'
+import {
+  addDaysInTimeZone,
+  addMonthsInTimeZone,
+  formatDateInTimeZone,
+  formatTimeInTimeZone,
+  getDayKeyInTimeZone,
+  getMinutesInTimeZoneDay,
+  getStartOfMonthInTimeZone,
+  getStartOfWeekInTimeZone,
+  normalizeTimeZone,
+  zonedDateTimeToUtc
+} from '../utils/timezone'
 
 type UseCalendarOptions = {
   shifts: MaybeRefOrGetter<Readonly<Shift[]>>
   initialMode?: CalendarMode
+  timeZone?: MaybeRefOrGetter<string>
 }
 
-export const useCalendar = ({ shifts, initialMode = 'week' }: UseCalendarOptions) => {
+export const useCalendar = ({ shifts, initialMode = 'week', timeZone }: UseCalendarOptions) => {
   const modes: CalendarMode[] = ['day', 'week', 'month']
   const modeLabels: Record<CalendarMode, string> = { day: 'Day', week: 'Week', month: 'Month' }
   const weekdayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -15,22 +28,23 @@ export const useCalendar = ({ shifts, initialMode = 'week' }: UseCalendarOptions
 
   const activeMode = ref<CalendarMode>(initialMode)
   const activeDate = ref(new Date())
+  const normalizedTimeZone = computed(() => normalizeTimeZone(toValue(timeZone) ?? 'UTC'))
 
   const weekDays = computed(() => {
-    const start = startOfWeek(activeDate.value)
-    return Array.from({ length: 7 }, (_, index) => addDays(start, index))
+    const start = getStartOfWeekInTimeZone(activeDate.value, normalizedTimeZone.value)
+    return Array.from({ length: 7 }, (_, index) => addDaysInTimeZone(start, index, normalizedTimeZone.value))
   })
 
   const monthGrid = computed(() => {
-    const firstDayOfMonth = new Date(activeDate.value.getFullYear(), activeDate.value.getMonth(), 1)
-    const gridStart = startOfWeek(firstDayOfMonth)
+    const firstDayOfMonth = getStartOfMonthInTimeZone(activeDate.value, normalizedTimeZone.value)
+    const gridStart = getStartOfWeekInTimeZone(firstDayOfMonth, normalizedTimeZone.value)
 
-    return Array.from({ length: 42 }, (_, index) => addDays(gridStart, index))
+    return Array.from({ length: 42 }, (_, index) => addDaysInTimeZone(gridStart, index, normalizedTimeZone.value))
   })
 
   const shiftsByDayKey = computed(() => {
     return toValue(shifts).reduce<Record<string, Shift[]>>((acc, shift) => {
-      const key = dayKey(new Date(shift.start))
+      const key = dayKey(new Date(shift.start), normalizedTimeZone.value)
       acc[key] ??= []
       acc[key].push(shift)
       return acc
@@ -38,13 +52,13 @@ export const useCalendar = ({ shifts, initialMode = 'week' }: UseCalendarOptions
   })
 
   const dayShifts = computed(() => {
-    const key = dayKey(activeDate.value)
-    return (shiftsByDayKey.value[key] ?? []).sort(sortByStart)
+    const key = dayKey(activeDate.value, normalizedTimeZone.value)
+    return (shiftsByDayKey.value[key] ?? []).sort((a, b) => sortByStart(a, b, normalizedTimeZone.value))
   })
 
   const periodLabel = computed(() => {
     if (activeMode.value === 'day') {
-      return `${formatWeekday(activeDate.value)}, ${activeDate.value.toLocaleDateString(undefined, {
+      return `${formatWeekday(activeDate.value, normalizedTimeZone.value)}, ${formatDateInTimeZone(activeDate.value, normalizedTimeZone.value, {
         month: 'long',
         day: 'numeric',
         year: 'numeric'
@@ -54,42 +68,46 @@ export const useCalendar = ({ shifts, initialMode = 'week' }: UseCalendarOptions
     if (activeMode.value === 'week') {
       const start = weekDays.value[0] ?? activeDate.value
       const end = weekDays.value[6] ?? start
-      return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })}`
+      return `${formatDateInTimeZone(start, normalizedTimeZone.value, { month: 'short', day: 'numeric' })} - ${formatDateInTimeZone(
+        end,
+        normalizedTimeZone.value,
+        {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }
+      )}`
     }
 
-    return activeDate.value.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    return formatDateInTimeZone(activeDate.value, normalizedTimeZone.value, { month: 'long', year: 'numeric' })
   })
 
   const goToPrevious = () => {
     if (activeMode.value === 'day') {
-      activeDate.value = addDays(activeDate.value, -1)
+      activeDate.value = addDaysInTimeZone(activeDate.value, -1, normalizedTimeZone.value)
       return
     }
 
     if (activeMode.value === 'week') {
-      activeDate.value = addDays(activeDate.value, -7)
+      activeDate.value = addDaysInTimeZone(activeDate.value, -7, normalizedTimeZone.value)
       return
     }
 
-    activeDate.value = new Date(activeDate.value.getFullYear(), activeDate.value.getMonth() - 1, 1)
+    activeDate.value = addMonthsInTimeZone(activeDate.value, -1, normalizedTimeZone.value)
   }
 
   const goToNext = () => {
     if (activeMode.value === 'day') {
-      activeDate.value = addDays(activeDate.value, 1)
+      activeDate.value = addDaysInTimeZone(activeDate.value, 1, normalizedTimeZone.value)
       return
     }
 
     if (activeMode.value === 'week') {
-      activeDate.value = addDays(activeDate.value, 7)
+      activeDate.value = addDaysInTimeZone(activeDate.value, 7, normalizedTimeZone.value)
       return
     }
 
-    activeDate.value = new Date(activeDate.value.getFullYear(), activeDate.value.getMonth() + 1, 1)
+    activeDate.value = addMonthsInTimeZone(activeDate.value, 1, normalizedTimeZone.value)
   }
 
   const goToToday = () => {
@@ -112,58 +130,41 @@ export const useCalendar = ({ shifts, initialMode = 'week' }: UseCalendarOptions
     goToNext,
     goToToday,
     dayKey,
-    shiftStyle,
     formatWeekday,
     formatMonthDay,
     formatHour,
     formatHourMinute,
-    formatTimeRange,
     isSameMonth,
-    isToday
+    isToday,
+    toIsoInTimeZone: (baseDate: Date, minutes: number) => withMinutes(baseDate, minutes, normalizedTimeZone.value)
   }
 }
 
-const shiftStyle = (shift: Shift, dayHeight = 960) => {
-  const start = new Date(shift.start)
-  const end = new Date(shift.end)
-  const top = ((start.getHours() * 60 + start.getMinutes()) / (24 * 60)) * dayHeight
-  const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000)
-  const height = (durationMinutes / (24 * 60)) * dayHeight
+const dayKey = (date: Date, timeZone = 'UTC') => getDayKeyInTimeZone(date, timeZone)
 
-  return {
-    top: `${top}px`,
-    height: `${height}px`,
-    backgroundColor: shift.color ?? '#dbeafe',
-    borderColor: shift.color ?? '#bfdbfe'
-  }
+const withMinutes = (baseDate: Date, minutes: number, timeZone: string) => {
+  const key = dayKey(baseDate, timeZone)
+  const [yearPart = '', monthPart = '', dayPart = ''] = key.split('-')
+  const parsedYear = Number(yearPart)
+  const parsedMonth = Number(monthPart)
+  const parsedDay = Number(dayPart)
+
+  const year = Number.isFinite(parsedYear) ? parsedYear : baseDate.getUTCFullYear()
+  const month = Number.isFinite(parsedMonth) ? parsedMonth : baseDate.getUTCMonth() + 1
+  const day = Number.isFinite(parsedDay) ? parsedDay : baseDate.getUTCDate()
+
+  const hour = Math.floor(minutes / 60)
+  const minute = minutes % 60
+  return zonedDateTimeToUtc(timeZone, year, month, day, hour, minute, 0).toISOString()
 }
 
-const dayKey = (date: Date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+const sortByStart = (a: Shift, b: Shift, timeZone: string) =>
+  getMinutesInTimeZoneDay(new Date(a.start), timeZone) - getMinutesInTimeZoneDay(new Date(b.start), timeZone)
 
-const startOfWeek = (date: Date) => {
-  const copy = new Date(date)
-  copy.setHours(0, 0, 0, 0)
-  copy.setDate(copy.getDate() - copy.getDay())
-  return copy
-}
+const formatWeekday = (date: Date, timeZone: string, short = false) =>
+  formatDateInTimeZone(date, timeZone, { weekday: short ? 'short' : 'long' })
 
-const addDays = (date: Date, days: number) => {
-  const copy = new Date(date)
-  copy.setDate(copy.getDate() + days)
-  return copy
-}
-
-const sortByStart = (a: Shift, b: Shift) => new Date(a.start).getTime() - new Date(b.start).getTime()
-
-const formatWeekday = (date: Date, short = false) =>
-  date.toLocaleDateString(undefined, { weekday: short ? 'short' : 'long' })
-
-const formatMonthDay = (date: Date) => date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+const formatMonthDay = (date: Date, timeZone: string) => formatDateInTimeZone(date, timeZone, { month: 'short', day: 'numeric' })
 
 const formatHour = (hour: number) => {
   const suffix = hour >= 12 ? 'PM' : 'AM'
@@ -171,15 +172,14 @@ const formatHour = (hour: number) => {
   return `${normalized}${suffix}`
 }
 
-const formatHourMinute = (isoDate: string) =>
-  new Date(isoDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+const formatHourMinute = (isoDate: string, timeZone: string) =>
+  formatTimeInTimeZone(new Date(isoDate), timeZone, { hour: 'numeric', minute: '2-digit' })
 
-const formatTimeRange = (startIso: string, endIso: string) => `${formatHourMinute(startIso)} - ${formatHourMinute(endIso)}`
+const isSameMonth = (left: Date, right: Date, timeZone: string) =>
+  formatDateInTimeZone(left, timeZone, { year: 'numeric', month: '2-digit' }) ===
+  formatDateInTimeZone(right, timeZone, { year: 'numeric', month: '2-digit' })
 
-const isSameMonth = (left: Date, right: Date) =>
-  left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth()
-
-const isToday = (date: Date) => {
+const isToday = (date: Date, timeZone: string) => {
   const today = new Date()
-  return dayKey(today) === dayKey(date)
+  return dayKey(today, timeZone) === dayKey(date, timeZone)
 }
