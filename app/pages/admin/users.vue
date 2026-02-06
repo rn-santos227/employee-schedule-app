@@ -22,6 +22,14 @@
                 variant="secondary"
                 size="sm"
                 icon-only
+                :icon="CalendarDaysIcon"
+                aria-label="Open schedule"
+                @click="openSchedule(row as User)"
+              />
+              <BaseButton
+                variant="secondary"
+                size="sm"
+                icon-only
                 :icon="PencilSquareIcon"
                 aria-label="Edit user"
                 @click="openEdit(row as User)"
