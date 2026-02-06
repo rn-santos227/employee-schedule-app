@@ -87,7 +87,7 @@ const closeModal = () => {
   activeShift.value = null
 }
 
-const handleSave = async (payload: { title: string; notes?: string }) => {
+const handleSave = async (payload: { title: string; notes?: string; color: string }) => {
   const targetName = employee.value?.name ?? 'Employee'
   const isUpdate = Boolean(activeShift.value)
 
@@ -99,7 +99,8 @@ const handleSave = async (payload: { title: string; notes?: string }) => {
         title: payload.title,
         notes: payload.notes,
         start: draftRange.start,
-        end: draftRange.end
+        end: draftRange.end,
+        color: payload.color
       })
     } else {
       shiftsStore.create({
@@ -109,7 +110,7 @@ const handleSave = async (payload: { title: string; notes?: string }) => {
         notes: payload.notes,
         start: draftRange.start,
         end: draftRange.end,
-        color: '#dbeafe'
+        color: payload.color
       })
     }
   } finally {

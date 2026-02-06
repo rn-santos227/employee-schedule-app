@@ -21,7 +21,8 @@ export const useShiftForm = (initialContext: ShiftFormContext) => {
 
   const form = reactive({
     title: initialContext.shift?.title ?? '',
-    notes: initialContext.shift?.notes ?? ''
+    notes: initialContext.shift?.notes ?? '',
+    color: initialContext.shift?.color ?? '#dbeafe'
   })
 
   const errors = reactive<ShiftFieldErrors>({
@@ -50,6 +51,7 @@ export const useShiftForm = (initialContext: ShiftFormContext) => {
     setContext(nextContext)
     form.title = nextContext.shift?.title ?? ''
     form.notes = nextContext.shift?.notes ?? ''
+    form.color = nextContext.shift?.color ?? '#dbeafe'
     applyErrors({
       title: '',
       notes: '',
@@ -75,7 +77,8 @@ export const useShiftForm = (initialContext: ShiftFormContext) => {
 
     return {
       title: form.title.trim(),
-      notes: notes || undefined
+      notes: notes || undefined,
+      color: form.color
     }
   })
 

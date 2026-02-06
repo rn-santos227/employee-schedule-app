@@ -21,6 +21,11 @@
         placeholder="Optional handoff notes"
         :error="errors.notes"
       />
+      <BaseColorPicker
+        v-model="form.color"
+        label="Shift color"
+        helper-text="Pick a color for this shift card"
+      />
     </form>
 
     <template #footer>
@@ -41,6 +46,7 @@ import type { Shift } from '../../@types/shift'
 import { useShiftForm } from '../../composables/useShiftForm'
 import BaseButton from '../ui/BaseButton.vue'
 import BaseModal from '../ui/BaseModal.vue'
+import BaseColorPicker from '../ui/BaseColorPicker.vue'
 import BaseTextArea from '../ui/BaseTextArea.vue'
 import BaseTextField from '../ui/BaseTextField.vue'
 
@@ -52,7 +58,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  save: [{ title: string; notes?: string }]
+  save: [{ title: string; notes?: string; color: string }]
   delete: []
 }>()
 
