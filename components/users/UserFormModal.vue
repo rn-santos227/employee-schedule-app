@@ -68,6 +68,7 @@ import {
   validateUserFields,
   type UserFieldErrors
 } from '../../composables/validators/userFields'
+import { useUsersStore } from '../../stores/users'
 
 import timezones from '../../data/tomezones.json'
 import BaseButton from '../ui/BaseButton.vue'
@@ -99,6 +100,8 @@ const form = reactive<UserFormModel>({
   timezone: '',
   passwordPlain: ''
 })
+
+const usersStore = useUsersStore()
 
 const errors = reactive<UserFieldErrors>({
   name: '',
@@ -161,6 +164,28 @@ const handleSubmit = () => {
   applyErrors(nextErrors)
 
   if (hasUserFieldErrors(nextErrors)) {
+    return
+  }
+
+  usersStore.ensureLoaded()
+  const normalizedEmail = form.email.trim().toLowerCase()
+  const duplicateEmail = usersStore.users.find((user) => {
+    if (user.email.toLowerCase() !== normalizedEmail) {
+      return false
+    }
+
+    if (!isEditing.value) {
+      return true
+    }
+
+    return user.id !== props.user?.id
+  })
+
+  if (duplicateEmail) {
+    applyErrors({
+      ...nextErrors,
+      email: 'Email address is already in use.'
+    })
     return
   }
 

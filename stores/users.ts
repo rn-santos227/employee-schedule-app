@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { User } from '../@types/user'
 import usersData from '../data/users.json'
+import { createPasswordSalt, hashPassword } from '../utils/passwordClient'
 
 const STORAGE_KEY = 'ms_users'
 const seedUsers = usersData as User[]
@@ -53,24 +54,46 @@ export const useUsersStore = defineStore('users', {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.users))
     },
 
-    create(user: Omit<User, 'id'>) {
+    async create(user: Omit<User, 'id'>) {
       this.ensureLoaded()
       const newUser: User = {
         ...user,
         id: crypto.randomUUID()
       }
+
+      if (newUser.passwordPlain) {
+        const salt = createPasswordSalt()
+        if (salt) {
+          newUser.passwordSalt = salt
+          newUser.passwordHash = await hashPassword(newUser.passwordPlain, salt)
+        }
+      }
+
       this.users = [...this.users, newUser]
       this.persist()
       return newUser
     },
 
-    update(id: string, patch: Partial<User>) {
+    async update(id: string, patch: Partial<User>) {
       this.ensureLoaded()
+      let nextPatch = { ...patch }
+
+      if (nextPatch.passwordPlain) {
+        const salt = createPasswordSalt()
+        if (salt) {
+          nextPatch = {
+            ...nextPatch,
+            passwordSalt: salt,
+            passwordHash: await hashPassword(nextPatch.passwordPlain, salt)
+          }
+        }
+      }
+
       this.users = this.users.map((user) =>
         user.id === id
           ? {
               ...user,
-              ...patch
+              ...nextPatch
             }
           : user
       )

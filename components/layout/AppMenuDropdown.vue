@@ -19,7 +19,7 @@
         aria-label="Main menu"
       >
         <NuxtLink
-          :to="auth.isAdmin ? ROUTES.adminUsers : ROUTES.employeeSchedule"
+          :to="primaryRoute"
           class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
           role="menuitem"
           @click="closeMenu"
@@ -73,6 +73,18 @@ const currentUser = computed(() => {
 
   usersStore.ensureLoaded()
   return usersStore.byId(auth.userId) ?? null
+})
+
+const primaryRoute = computed(() => {
+  if (auth.isAdmin) {
+    return ROUTES.adminUsers
+  }
+
+  if (auth.userId) {
+    return ROUTES.employeeScheduleById(auth.userId)
+  }
+
+  return ROUTES.login
 })
 
 const closeMenu = () => {

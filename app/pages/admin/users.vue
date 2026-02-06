@@ -139,9 +139,9 @@ const handleSave = async (payload: Omit<User, 'id'>) => {
 
   try {
     if (isUpdate && activeUser.value) {
-      usersStore.update(activeUser.value.id, patch)
+      await usersStore.update(activeUser.value.id, patch)
     } else {
-      usersStore.create(patch)
+      await usersStore.create(patch)
     }
   } finally {
     loadingStore.stop()

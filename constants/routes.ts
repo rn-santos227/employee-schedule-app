@@ -3,6 +3,5 @@ export const ROUTES = {
   adminUsers: '/admin/users',
   adminSchedule: '/admin/schedule',
   adminScheduleByEmployeeId: (id: string) => `/admin/schedule/${id}`,
-  employeeSchedule: '/employee/schedule',
   employeeScheduleById: (id: string) => `/employee/schedule/${id}`
 } as const

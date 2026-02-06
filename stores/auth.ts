@@ -21,6 +21,8 @@ export const useAuthStore = defineStore('auth', {
       if (hasLoaded) return
       hasLoaded = true
 
+      if (typeof window === 'undefined') return
+
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return
 
@@ -43,14 +45,16 @@ export const useAuthStore = defineStore('auth', {
       this.role = role
       hasLoaded = true
 
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          token: this.token,
-          userId: this.userId,
-          role: this.role
-        })
-      )
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            token: this.token,
+            userId: this.userId,
+            role: this.role
+          })
+        )
+      }
     },
 
     logout() {

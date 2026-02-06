@@ -7,4 +7,6 @@ export type User = {
   role: Role
   timezone?: string
   passwordPlain?: string
+  passwordSalt?: string
+  passwordHash?: string
 }

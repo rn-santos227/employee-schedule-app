@@ -19,6 +19,13 @@ onMounted(async () => {
     return
   }
 
-  await navigateTo(auth.isAdmin ? ROUTES.adminUsers : ROUTES.employeeSchedule)
+  if (!auth.userId) {
+    await navigateTo(ROUTES.login)
+    return
+  }
+
+  await navigateTo(
+    auth.isAdmin ? ROUTES.adminUsers : ROUTES.employeeScheduleById(auth.userId)
+  )
 })
 </script>

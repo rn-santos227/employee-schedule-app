@@ -33,14 +33,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { Role } from '../../@types/auth'
 import { useAuthStore } from '../../stores/auth'
 import { ROUTES } from '../../constants/routes'
 import { useToast } from '../../composables/useToast'
 import { useLoadingStore } from '../../stores/loading'
+import { useUsersStore } from '../../stores/users'
 
 const auth = useAuthStore()
+const usersStore = useUsersStore()
 
 const email = ref('')
 const password = ref('')
@@ -68,12 +70,42 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   loadingStore.start('Signing you in...')
 
+  const normalizedEmail = email.value.trim().toLowerCase()
+  const normalizedPassword = password.value
+
   try {
+    usersStore.ensureLoaded()
+    const localUser = usersStore.users.find(
+      (user) =>
+        user.email.toLowerCase() === normalizedEmail &&
+        user.passwordPlain &&
+        user.passwordPlain === normalizedPassword
+    )
+
+    if (localUser) {
+      auth.login(localUser.id, localUser.role)
+      email.value = ''
+      password.value = ''
+
+      addToast({
+        title: 'Signed in',
+        message: `Welcome back, ${localUser.name}.`,
+        variant: 'success'
+      })
+
+      await navigateTo(
+        localUser.role === 'admin'
+          ? ROUTES.adminUsers
+          : ROUTES.employeeScheduleById(localUser.id)
+      )
+      return
+    }
+
     const response = await $fetch<LoginResponse>('/api/auth/login', {
       method: 'POST',
       body: {
-        email: email.value,
-        password: password.value
+        email: normalizedEmail,
+        password: normalizedPassword
       }
     })
 
@@ -88,7 +120,9 @@ const handleSubmit = async () => {
     })
 
     await navigateTo(
-      response.role === 'admin' ? ROUTES.adminUsers : ROUTES.employeeSchedule
+      response.role === 'admin'
+        ? ROUTES.adminUsers
+        : ROUTES.employeeScheduleById(response.userId)
     )
   } catch (error) {
     addToast({
@@ -101,4 +135,8 @@ const handleSubmit = async () => {
     loadingStore.stop()
   }
 }
+
+onMounted(() => {
+  usersStore.load()
+})
 </script>
