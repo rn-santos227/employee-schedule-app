@@ -42,11 +42,11 @@ describe('users store', () => {
     expect(localStorage.setItem).toHaveBeenCalledWith('ms_users', JSON.stringify(usersSeed))
   })
 
-  it('creates a user and persists it', () => {
+  it('creates a user and persists it', async () => {
     const store = useUsersStore()
     store.load()
 
-    const created = store.create({
+    const created = await store.create({
       name: 'Taylor Employee',
       email: 'taylor.employee@example.com',
       role: 'employee',
@@ -58,11 +58,11 @@ describe('users store', () => {
     expect(localStorage.setItem).toHaveBeenLastCalledWith('ms_users', JSON.stringify(store.users))
   })
 
-  it('updates an existing user', () => {
+  it('updates an existing user', async () => {
     const store = useUsersStore()
     store.load()
 
-    store.update('u-employee-1', {
+    await store.update('u-employee-1', {
       name: 'Erin Updated',
       timezone: 'America/Phoenix'
     })
