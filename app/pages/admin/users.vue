@@ -50,17 +50,21 @@
 </template>
 
 <script setup lang="ts">
-import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
-import { onMounted, ref } from 'vue'
+import { CalendarDaysIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { computed, onMounted, ref } from 'vue'
+import { navigateTo } from 'nuxt/app'
 import type { User } from '../../../@types/user'
 import { useUsersStore } from '../../../stores/users'
 import { useDialog } from '../../../composables/useDialog'
 import { useLoadingStore } from '../../../stores/loading'
+import { useAuthStore } from '../../../stores/auth'
 import adminMiddleware from '../../../middleware/admin'
+import { ROUTES } from '../../../constants/routes'
 
 definePageMeta({ middleware: [adminMiddleware] })
 
 const usersStore = useUsersStore()
+const authStore = useAuthStore()
 const { showDialog } = useDialog()
 const loadingStore = useLoadingStore()
 
@@ -74,8 +78,13 @@ const columns = [
 ]
 
 onMounted(() => {
+  authStore.load()
   usersStore.load()
 })
+
+const managedUsers = computed(() =>
+  usersStore.users.filter((user) => user.id !== authStore.userId)
+)
 
 const openCreate = () => {
   activeUser.value = null
@@ -85,6 +94,10 @@ const openCreate = () => {
 const openEdit = (user: User) => {
   activeUser.value = user
   isModalOpen.value = true
+}
+
+const openSchedule = (user: User) => {
+  navigateTo(ROUTES.adminScheduleByEmployeeId(user.id))
 }
 
 const closeModal = () => {
