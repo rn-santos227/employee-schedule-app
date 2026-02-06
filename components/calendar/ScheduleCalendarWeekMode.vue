@@ -25,7 +25,7 @@
         >
           <ShiftCard
             v-for="segment in shiftsByWeekDay[dayKey(day)] ?? []"
-            :key="`${segment.shift.id}-${segment.displayStart}`"
+            :key="`${segment.shift.id}-${dayKey(day)}`"
             :shift="segment.shift"
             :day-height="720"
             :readonly="readonly"
