@@ -9,7 +9,10 @@
         v-for="day in monthGrid"
         :key="day.toISOString()"
         class="min-h-32 border-b border-r border-slate-100 p-2 text-xs last:border-r-0"
-        :class="isSameMonth(day, activeDate) ? 'bg-white' : 'bg-slate-50 text-slate-400'"
+        :class="[
+          isSameMonth(day, activeDate) ? 'bg-white' : 'bg-slate-50 text-slate-400',
+          isToday(day) ? 'bg-indigo-50 ring-1 ring-inset ring-indigo-200' : ''
+        ]"
       >
         <p class="mb-2 flex items-center justify-between">
           <span class="font-medium">{{ day.getDate() }}</span>

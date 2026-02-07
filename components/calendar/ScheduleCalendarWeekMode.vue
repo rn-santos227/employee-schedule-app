@@ -2,9 +2,16 @@
   <div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
     <div class="grid grid-cols-[4rem_repeat(7,minmax(0,1fr))] border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
       <div class="px-2 py-2">Time</div>
-      <div v-for="day in weekDays" :key="day.toISOString()" class="border-l border-slate-200 px-2 py-2">
+      <div
+        v-for="day in weekDays"
+        :key="day.toISOString()"
+        class="border-l border-slate-200 px-2 py-2"
+        :class="isToday(day) ? 'bg-indigo-50/70 text-indigo-800' : ''"
+      >
         <p>{{ formatWeekday(day, true) }}</p>
-        <p class="text-[11px] font-normal normal-case tracking-normal text-slate-600">{{ formatMonthDay(day) }}</p>
+        <p class="text-[11px] font-normal normal-case tracking-normal" :class="isToday(day) ? 'text-indigo-700' : 'text-slate-600'">
+          {{ formatMonthDay(day) }}
+        </p>
       </div>
     </div>
 
@@ -21,6 +28,7 @@
           v-for="(day, index) in weekDays"
           :key="`col-${day.toISOString()}`"
           class="relative border-l border-slate-100"
+          :class="isToday(day) ? 'bg-indigo-50/40' : ''"
           @mousedown="emit('createMouseDown', $event, day, index)"
         >
           <ShiftCard
@@ -77,6 +85,7 @@ const props = defineProps<{
   formatHour: (hour: number) => string
   dragPreview: DragPreview | null
   timeZone: string
+  isToday: (date: Date) => boolean
 }>()
 
 const emit = defineEmits<{

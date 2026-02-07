@@ -13,6 +13,15 @@
       </div>
 
       <div class="absolute inset-y-0 left-[5rem] right-0" @mousedown="emit('createMouseDown', $event)">
+        <div
+          v-if="showCurrentTimeIndicator"
+          class="pointer-events-none absolute left-0 right-0 flex items-center text-indigo-600"
+          :style="{ top: `${currentTimeTop}px` }"
+        >
+          <span class="-ml-1 h-2 w-2 rounded-full bg-indigo-600" />
+          <span class="ml-2 h-px flex-1 bg-indigo-600/70" />
+        </div>
+
         <ShiftCard
           v-for="shift in dayShifts"
           :key="shift.id"
@@ -35,8 +44,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { Shift } from '../../@types/shift'
+import { getMinutesInTimeZoneDay } from '../../utils/timezone'
 import ShiftCard from './ShiftCard.vue'
 
 type DragPreview = {
@@ -49,9 +59,11 @@ const props = defineProps<{
   dayShifts: Shift[]
   readonly: boolean
   headerLabel: string
+  activeDate: Date
   formatHour: (hour: number) => string
   dragPreview: DragPreview | null
   timeZone: string
+  isToday: (date: Date) => boolean
 }>()
 
 const emit = defineEmits<{
@@ -59,6 +71,24 @@ const emit = defineEmits<{
   shiftSelect: [Shift]
   shiftUpdate: [Shift, { start: string; end: string }]
 }>()
+
+const currentTime = ref(new Date())
+let intervalId: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    currentTime.value = new Date()
+  }, 60 * 1000)
+})
+
+onBeforeUnmount(() => {
+  if (intervalId) {
+    clearInterval(intervalId)
+  }
+})
+
+const showCurrentTimeIndicator = computed(() => props.isToday(props.activeDate))
+const currentTimeTop = computed(() => (getMinutesInTimeZoneDay(currentTime.value, props.timeZone) / (24 * 60)) * 960)
 
 const dragPreviewStyle = computed(() => {
   if (!props.dragPreview) {
