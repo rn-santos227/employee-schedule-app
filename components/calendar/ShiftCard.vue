@@ -41,6 +41,7 @@ const props = defineProps<{
   timeZone?: string
   displayStart?: string
   displayEnd?: string
+  allowHorizontalMove?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -76,18 +77,24 @@ const startInteraction = (event: MouseEvent, mode: DragMode) => {
   }
 
   const startY = event.clientY
+  const startX = event.clientX
   const initialStart = new Date(props.shift.start)
   const initialEnd = new Date(props.shift.end)
   const initialDurationMinutes = Math.max(30, (initialEnd.getTime() - initialStart.getTime()) / 60000)
   isDragging.value = mode === 'move'
+  const columnWidth = event.currentTarget instanceof HTMLElement ? event.currentTarget.parentElement?.getBoundingClientRect().width ?? 0 : 0
 
   const onMove = (moveEvent: MouseEvent) => {
     const deltaY = moveEvent.clientY - startY
     const minuteDelta = Math.round((deltaY / props.dayHeight) * 24 * 60 / 15) * 15
+    const dayDelta =
+      mode === 'move' && props.allowHorizontalMove && columnWidth > 0
+        ? Math.round((moveEvent.clientX - startX) / columnWidth)
+        : 0
 
     if (mode === 'move') {
       const nextStart = new Date(initialStart)
-      nextStart.setMinutes(nextStart.getMinutes() + minuteDelta)
+      nextStart.setMinutes(nextStart.getMinutes() + minuteDelta + dayDelta * 24 * 60)
 
       const nextEnd = new Date(nextStart)
       nextEnd.setMinutes(nextStart.getMinutes() + initialDurationMinutes)

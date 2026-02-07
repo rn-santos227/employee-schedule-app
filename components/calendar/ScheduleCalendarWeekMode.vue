@@ -40,6 +40,7 @@
             :time-zone="timeZone"
             :display-start="segment.displayStart"
             :display-end="segment.displayEnd"
+            :allow-horizontal-move="true"
             @select="emit('shiftSelect', $event)"
             @update="(shift, patch) => emit('shiftUpdate', shift, patch)"
           />
