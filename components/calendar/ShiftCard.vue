@@ -89,7 +89,10 @@ const startInteraction = (event: MouseEvent, mode: DragMode) => {
     const minuteDelta = Math.round((deltaY / props.dayHeight) * 24 * 60 / 15) * 15
     const dayDelta =
       mode === 'move' && props.allowHorizontalMove && columnWidth > 0
-        ? Math.round((moveEvent.clientX - startX) / columnWidth)
+        ? (() => {
+            const rawDelta = (moveEvent.clientX - startX) / columnWidth
+            return rawDelta >= 0 ? Math.floor(rawDelta) : Math.ceil(rawDelta)
+          })()
         : 0
 
     if (mode === 'move') {
